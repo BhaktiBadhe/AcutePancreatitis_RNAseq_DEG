@@ -1,4 +1,4 @@
-setwd("T:/8sem_intern/GSE194331_HC_PAN_PANSEP_counts.txt")
+# set the path to the folder
 
 library(DESeq2)
 library(tidyverse)
@@ -129,3 +129,4 @@ nrow(sig_deg)
 
 # Save results
 write.csv(sig_deg,"AP_vs_HC_DEGs.csv",row.names = FALSE)
+
