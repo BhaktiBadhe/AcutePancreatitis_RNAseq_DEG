@@ -1,60 +1,4 @@
 # set the path to the folder
-
-library(DESeq2)
-library(tidyverse)
-library(pheatmap)
-
-# Load the counts
-counts <- read.table("GSE194331_HC_PAN_PANSEP_counts.txt",header = TRUE,row.names = 1,
-  sep = "\t", check.names = FALSE)
-
-colnames(counts)
-
-# Load metadata
-metadata <- read.csv("metadata.csv", header = TRUE, stringsAsFactors = FALSE)
-
-# Standardize column names
-library(dplyr)
-library(stringr)
-
-metadata$condition <- case_when(
-  str_trim(metadata$Condition) == "Healthy control" ~ "HC",
-  str_trim(metadata$Condition) == "Moderately-severe AP" ~ "Moderate",
-  str_trim(metadata$Condition) == "Severe AP" ~ "Severe",
-  str_trim(metadata$Condition) == "Mild AP" ~ "Mild",
-  TRUE ~ "UNKNOWN")
-
-# Drop mild AP samples
-metadata <- metadata %>%
-  dplyr::filter(condition %in% c("HC", "Moderate", "Severe"))
-
-# find common samples
-common_samples <- intersect(colnames(counts), metadata$Sample)
-length(common_samples)
-
-# SUbset both counts and metadata
-counts <- counts[, common_samples]
-metadata <- metadata[match(common_samples, metadata$Sample), ]
-
-# verify order
-all(colnames(counts) == metadata$Sample)
-
-# Finalize metadata
-rownames(metadata) <- metadata$Sample
-metadata$condition <- factor(metadata$condition,levels = c("HC", "Moderate", "Severe"))
-table(metadata$condition)
-
-# Create DESeq2 object
-dds <- DESeqDataSetFromMatrix(countData = counts,
-  colData = metadata,
-  design = ~ condition)     # dim: 58735 62 
-
-# filter low count genes
-dds <- dds[rowSums(counts(dds)) > 10, ]  # dim: 26915 62 
-
-# Run DESeq2
-dds <- DESeq(dds)
-
 # ------------------------------------------------------------------------------------
 
 library(DESeq2)
@@ -129,4 +73,5 @@ nrow(sig_deg)
 
 # Save results
 write.csv(sig_deg,"AP_vs_HC_DEGs.csv",row.names = FALSE)
+
 
